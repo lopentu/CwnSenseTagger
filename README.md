@@ -19,7 +19,7 @@ In this project, we aim to solve this problem by state-of-the-art Bert model.  I
 
         pip3 install .
         import CWN_WSD
-        data = read_some_where() #list of sentence, and sentence is composed as list of word
+        data = read_somewhere() #list of sentence, and sentence is composed as list of word
         sense = CWN_WSD.wsd(data)
 * example can be found under example folder
         
