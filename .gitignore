@@ -7,6 +7,7 @@
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 /*.egg
-/CWN_WSD/data
+/CWN_WSD/data/*.ckpt
+/CWN_WSD/data/*.pyobj
 /CWN_WSD/__pycache__
 /example/__pycache__
