@@ -19,7 +19,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "argparse",
         "numpy",
         "numpydoc",
         "pandas",

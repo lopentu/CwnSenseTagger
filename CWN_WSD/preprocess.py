@@ -9,34 +9,34 @@ from .cwn_base import CwnBase
 
 def simplify_pos(pos):
     relation = {
-        "A": "A",
-        "Caa": "C",
-        "Cab": "POST",
-        "Cba": "POST",
-        "Cbb": "C",
-        "Da": "ADV",
-        "Dfa": "ADV",
-        "Dfb": "ADV",
-        "Di": "ASP",
-        "Dk": "ADV",
-        "D": "ADV",
+        "A": "OTHER",
+        "Caa": "OTHER",
+        "Cab": "OTHER",
+        "Cba": "OTHER",
+        "Cbb": "OTHER",
+        "Da": "OTHER",
+        "Dfa": "OTHER",
+        "Dfb": "OTHER",
+        "Di": "OTHER",
+        "Dk": "OTHER",
+        "D": "OTHER",
         "Na": "N",
         "Nb": "Nb",
         "Nc": "N",
         "Ncd": "N",
         "Nd": "N",
-        "Neu": "DET",
-        "Nes": "DET",
-        "Nep": "DET",
-        "Neqa": "DET",
-        "Neqb": "POST",
-        "Nf": "M",
-        "Ng": "POST",
+        "Neu": "OTHER",
+        "Nes": "OTHER",
+        "Nep": "OTHER",
+        "Neqa": "OTHER",
+        "Neqb": "OTHER",
+        "Nf": "OTHER",
+        "Ng": "OTHER",
         "Nh": "N",
-        "Nv": "Nv",
-        "I": "T",
-        "P": "P",
-        "T": "T",
+        "Nv": "N",
+        "I": "OTHER",
+        "P": "OTHER",
+        "T": "OTHER",
         "VA": "V",
         "VAC": "V",
         "VB": "V",
@@ -52,40 +52,36 @@ def simplify_pos(pos):
         "VJ": "V",
         "VK": "V",
         "VL": "V",
-        "COLONCATEGORY": "S",
-        "COMMACATEGORY": "S",
-        "DASHCATEGORY": "S",
-        "ETCCATEGORY": "S",
-        "EXCLAMATIONCATEGORY": "S",
-        "PARENTHESISCATEGORY": "S",
-        "PAUSECATEGORY": "S",
-        "PERIODCATEGORY": "S",
-        "QUESTIONCATEGORY": "S",
-        "SEMICOLONCATEGORY": "S",
-        "SPCHANGECATEGORY": "S",
+        "COLONCATEGORY": "OTHER",
+        "COMMACATEGORY": "OTHER",
+        "DASHCATEGORY": "OTHER",
+        "ETCCATEGORY": "OTHER",
+        "EXCLAMATIONCATEGORY": "OTHER",
+        "PARENTHESISCATEGORY": "OTHER",
+        "PAUSECATEGORY": "OTHER",
+        "PERIODCATEGORY": "OTHER",
+        "QUESTIONCATEGORY": "OTHER",
+        "SEMICOLONCATEGORY": "OTHER",
+        "SPCHANGECATEGORY": "OTHER",
     }
     try:
         return relation[pos]
     except KeyError as e:
-        return pos
+        return "OTHER"
+
 
 #Search and filter senses from CWN
 def get_cwn_senses(cwn, word_info):
     senses = cwn.find_senses("^{}$".format(word_info["word"]))
+
     if len(senses) == 0:
         return []
-
-    simple_pos = simplify_pos(word_info["pos"])
-    same_pos_senses = list(filter(lambda x:simplify_pos(x.pos)==simple_pos, senses))
-
-    if len(same_pos_senses) < 2:
+    elif word_info['pos'] == "":
         return senses
-    
-    # To prevent the correct sense from being filtered
-    if word_info['sense_id'] is not "" and len(senses) != 0 and len(list(filter(lambda x:x.id == word_info["sense_id"], same_pos_senses))) == 0:
-        same_pos_senses.append(list(filter(lambda x:x.id == word_info["sense_id"], senses))[0])
-        
-    return same_pos_senses
+    else:
+        simple_pos = simplify_pos(word_info["pos"])
+        same_pos_senses = list(filter(lambda x:simplify_pos(x.pos)==simple_pos, senses))
+        return same_pos_senses
 
 
 #Generate original sentence with tag on target word
@@ -97,6 +93,7 @@ def generate_sentence(target, sentence_info):
         else:
             sentence += sentence_info[i][0]
     return sentence
+
 
 #Generate a row of training data
 def generate_row(word_info, cwn_sense):
@@ -117,8 +114,7 @@ def generate_row(word_info, cwn_sense):
     return row
 
 
-# data is list of sentences
-
+# data: a list of sentences
 def preprocess(data):
     logging.info("Preprocessing data")
     logging.info("Install CWN graph")
