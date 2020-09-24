@@ -5,10 +5,19 @@ import numpy as np
 from transformers import BertTokenizer
 from .config import BERT_MODEL
 
+tokenizer = None
+def warmup():
+    global tokenizer
+    if not tokenizer:
+        tokenizer = BertTokenizer.from_pretrained(BERT_MODEL, do_lower_case=True)
+
 def tokenize(test_data):
     all_instance = []
     logging.info("Tokenize data by %s"%(BERT_MODEL))
-    tokenizer = BertTokenizer.from_pretrained(BERT_MODEL, do_lower_case=True)
+    
+    global tokenizer
+    warmup()
+
     for sentence in test_data:
         one_sentence = []
         for word in sentence:

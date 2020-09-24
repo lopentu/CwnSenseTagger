@@ -6,6 +6,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #TEST_JSON = os.path.join(PROJECT_ROOT, "test/test.json")
 
 BERT_MODEL = "bert-base-chinese"
+MODEL_DIR = ""
 PAD = 0
 UNK = 1
 CLS = 2

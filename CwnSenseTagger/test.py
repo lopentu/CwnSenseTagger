@@ -12,6 +12,8 @@ from .config import BERT_MODEL, CLS, SEP, COMMA, PAD
 from .model import WSDBertClassifer
 from .util import positive_weight, accuracy
 
+wsd_model = None
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'data', 'model.ckpt')
 
 def batch_generation(batch_size, data):
     idx = 0
@@ -49,20 +51,26 @@ def batch_generation(batch_size, data):
 
     return all_batch
 
-def test(all_json, 
-        batch_size=8, 
-        model_path=os.path.join(os.path.dirname(__file__), 'data', 'cwn-wsd-model.ckpt')):
+def warmup(model_path=MODEL_PATH):
+    global wsd_model
+    if not wsd_model:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        logging.info('Device type is %s'%(device))
+        logging.info("Prepare Dataset")
+        checkpoint = torch.load(model_path)
+        wsd_model = WSDBertClassifer.from_pretrained(BERT_MODEL, state_dict=checkpoint["state_dict"])
+        wsd_model.to(device)
+        wsd_model.eval()
 
-    warnings.filterwarnings("ignore")
+@torch.no_grad()
+def test(all_json, batch_size=8, model_path=MODEL_PATH):
+    global wsd_model
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    logging.info('Device type is %s'%(device))
-    logging.info("Prepare Dataset")
+    warnings.filterwarnings("ignore")            
+    warmup(model_path)
     
-    checkpoint = torch.load(model_path)
-    model = WSDBertClassifer.from_pretrained(BERT_MODEL)
-    model.load_state_dict(checkpoint['state_dict'])
-    model.to(device)
-    model.eval()
+    # model.load_state_dict(checkpoint['state_dict'])    
     all_ans = []
     logging.info("Start Inference")
     for sentence in all_json:
@@ -71,14 +79,17 @@ def test(all_json,
             if word[0] == []:
                 sentence_ans.append(-1)
                 continue
+
             batches = batch_generation(batch_size, word)
+
             one_label = []
             one_predict = []
             for b in batches:
                 context = b['context'].to(device)
                 attention_mask = b['attention_mask'].to(device)
-                token_type_ids = b['token_type_ids'].to(torch.long).to(device)
-                logits, _ = model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+                token_type_ids = b['token_type_ids'].to(torch.long).to(device)                
+                
+                logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)                
                 one_predict += logits.squeeze(1).tolist()
             sentence_ans.append(np.argmax(one_predict))
         all_ans.append(sentence_ans)

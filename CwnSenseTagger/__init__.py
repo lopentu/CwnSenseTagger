@@ -14,6 +14,7 @@ from .cwn_base import CwnBase
 from .config import BERT_MODEL, CLS, SEP, COMMA, PAD
 from .model import WSDBertClassifer
 from .util import positive_weight, accuracy
+from .download import download, setup_model
 
 
 

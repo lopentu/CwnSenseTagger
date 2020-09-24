@@ -6,6 +6,7 @@ import os
 
 from .cwn_base import CwnBase
 
+__cwn_inst = None
 
 def simplify_pos(pos):
     relation = {
@@ -72,7 +73,7 @@ def simplify_pos(pos):
 
 #Search and filter senses from CWN
 def get_cwn_senses(cwn, word_info):
-    senses = cwn.find_senses("^{}$".format(word_info["word"]))
+    senses = cwn.find_all_senses(word_info["word"])
 
     if len(senses) == 0:
         return []
@@ -113,15 +114,21 @@ def generate_row(word_info, cwn_sense):
     row['label'] = True if word_info["sense_id"] == cwn_sense.id else False
     return row
 
+def get_cwn_inst():
+    global __cwn_inst
+    if not __cwn_inst:
+        logging.info("Preprocessing data")
+        logging.info("Install CWN graph")
+        CwnBase.install_cwn(os.path.join(os.path.dirname(__file__),"data","cwn_graph.pyobj"))
+        logging.info("Done")
+        __cwn_inst = CwnBase()
+    return __cwn_inst
 
 # data: a list of sentences
 def preprocess(data):
-    logging.info("Preprocessing data")
-    logging.info("Install CWN graph")
-    CwnBase.install_cwn(os.path.join(os.path.dirname(__file__),"data","cwn_graph.pyobj"))
-    logging.info("Done")
-    cwn = CwnBase()
+    
     all_data = []
+    cwn = get_cwn_inst()
     logging.info("Query CWN graph to build test data")
 
     for sentence_info in data:
@@ -133,8 +140,10 @@ def preprocess(data):
             word_info["pos"] = i[1]
             word_info["sense_id"] = i[2]
             word_info["definition"] = i[3]
-            word_info["sentence"] = generate_sentence(idx, sentence_info)  
+            
+            word_info["sentence"] = generate_sentence(idx, sentence_info)                          
             cwn_senses = get_cwn_senses(cwn, word_info)
+            
             if len(cwn_senses) == 0:
                 one_instance.append({'test_word': word_info["word"], 'test_pos' :word_info["pos"]} )
             for sense in cwn_senses:
