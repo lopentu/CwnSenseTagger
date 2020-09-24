@@ -1,5 +1,5 @@
-import pdb
 import re
+from itertools import chain
 from .cwn_types import GraphStructure, AnnotAction, AnnotRecord, CwnCheckerSuggestion, CwnIdNotFoundError  
 from .cwn_node_types import CwnNode, CwnGlyph, CwnLemma, CwnSense, CwnFacet, CwnSynset
 from .cwn_relation_types import CwnRelationType, CwnRelation
@@ -102,7 +102,12 @@ class CwnGraphUtils(GraphStructure):
                 example_matched:
                 sense_list.append(sense_x)                
         return sense_list            
-            
+
+    def find_all_senses(self, lemma):    
+        sense_iter = (x.senses for x in self.find_lemma(f"^{lemma}$"))
+        sense_iter = chain.from_iterable(sense_iter)
+        return list(sense_iter)       
+
     def find_edges(self, node_id, is_directed = True):
         ret = []
         
@@ -148,5 +153,3 @@ class CwnGraphUtils(GraphStructure):
         
     def from_sense_id(self, sense_id):
         return CwnSense(sense_id, self)
-
-

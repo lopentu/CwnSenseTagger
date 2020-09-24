@@ -11,9 +11,9 @@ from torch.utils.data import DataLoader, random_split
 from .config import BERT_MODEL, CLS, SEP, COMMA, PAD
 from .model import WSDBertClassifer
 from .util import positive_weight, accuracy
+from .download import get_model_path
 
 wsd_model = None
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'data', 'model.ckpt')
 
 def batch_generation(batch_size, data):
     idx = 0
@@ -51,24 +51,23 @@ def batch_generation(batch_size, data):
 
     return all_batch
 
-def warmup(model_path=MODEL_PATH):
+def warmup():
     global wsd_model
     if not wsd_model:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logging.info('Device type is %s'%(device))
-        logging.info("Prepare Dataset")
-        checkpoint = torch.load(model_path)
-        wsd_model = WSDBertClassifer.from_pretrained(BERT_MODEL, state_dict=checkpoint["state_dict"])
+        logging.info("Prepare Dataset")        
+        wsd_model = WSDBertClassifer.from_pretrained(get_model_path())
         wsd_model.to(device)
         wsd_model.eval()
 
 @torch.no_grad()
-def test(all_json, batch_size=8, model_path=MODEL_PATH):
+def test(all_json, batch_size=8):
     global wsd_model
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     warnings.filterwarnings("ignore")            
-    warmup(model_path)
+    warmup()
     
     # model.load_state_dict(checkpoint['state_dict'])    
     all_ans = []

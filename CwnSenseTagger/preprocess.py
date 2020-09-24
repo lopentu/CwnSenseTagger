@@ -5,6 +5,7 @@ import logging
 import os
 
 from .cwn_base import CwnBase
+from .download import get_model_path
 
 __cwn_inst = None
 
@@ -117,11 +118,10 @@ def generate_row(word_info, cwn_sense):
 def get_cwn_inst():
     global __cwn_inst
     if not __cwn_inst:
-        logging.info("Preprocessing data")
-        logging.info("Install CWN graph")
-        CwnBase.install_cwn(os.path.join(os.path.dirname(__file__),"data","cwn_graph.pyobj"))
-        logging.info("Done")
+        logging.info("Preprocessing data")        
+        logging.info("loading CWN")        
         __cwn_inst = CwnBase()
+        logging.info("Done")
     return __cwn_inst
 
 # data: a list of sentences
@@ -138,8 +138,8 @@ def preprocess(data):
             word_info = {}
             word_info["word"] = i[0]
             word_info["pos"] = i[1]
-            word_info["sense_id"] = i[2]
-            word_info["definition"] = i[3]
+            word_info["sense_id"] = ""
+            word_info["definition"] = ""
             
             word_info["sentence"] = generate_sentence(idx, sentence_info)                          
             cwn_senses = get_cwn_senses(cwn, word_info)

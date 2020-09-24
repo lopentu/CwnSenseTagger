@@ -4,12 +4,13 @@ import numpy as np
 
 from transformers import BertTokenizer
 from .config import BERT_MODEL
+from .download import get_model_path
 
 tokenizer = None
 def warmup():
     global tokenizer
     if not tokenizer:
-        tokenizer = BertTokenizer.from_pretrained(BERT_MODEL, do_lower_case=True)
+        tokenizer = BertTokenizer.from_pretrained(get_model_path())
 
 def tokenize(test_data):
     all_instance = []

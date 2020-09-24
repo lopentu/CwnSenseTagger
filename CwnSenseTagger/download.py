@@ -5,7 +5,7 @@ import tempfile
 def get_model_path():
     home_dir = os.path.expanduser("~")
     cache_dir = os.path.join(home_dir, ".cwn_graph")
-    model_path = os.path.join(cache_dir, "tagmodel")
+    model_path = os.path.join(cache_dir, "cwn-wsd-model")
     return model_path
 
 def download(upgrade=False):
@@ -13,10 +13,10 @@ def download(upgrade=False):
         print("A copy of DistilTag model already exists. Use upgrade=True to overwrite")
         return 
 
-    import gdown
-    url = "https://drive.google.com/uc?id=1AzUICPQ5MMt_IWg4JZ3mWM6vGbQkv01L"
+    import gdown    
+    url = "https://drive.google.com/uc?id=1xTdrqOuvLFs2ElHUmCJIcrnO3fKrbH5K"
     with tempfile.TemporaryDirectory("distiltag") as tmpdir:
-        outpath = os.path.join(tmpdir, "tagmodel.zip")
+        outpath = os.path.join(tmpdir, "cwn-wsd-model.zip")
         gdown.download(url, outpath, quiet=False)        
         setup_model(outpath)
 
@@ -30,4 +30,4 @@ def setup_model(zip_path):
     with zipfile.ZipFile(zip_path, "r") as ref:
         ref.extractall(cache_dir)
 
-    print("DistilTag model installed.")
+    print("CwnSenseTagger model installed.")
