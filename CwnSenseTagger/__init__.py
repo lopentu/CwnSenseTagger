@@ -11,7 +11,7 @@ from .cwn_relation_types import CwnRelationType, CwnRelation
 
 
 from .cwn_base import CwnBase
-from .config import BERT_MODEL, CLS, SEP, COMMA, PAD
+from .config import BERT_MODEL, CLS, SEP, COMMA, PAD, USE_CUDA
 from .model import WSDBertClassifer
 from .util import positive_weight, accuracy
 from .download import download, setup_model

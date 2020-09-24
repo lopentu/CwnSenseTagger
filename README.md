@@ -24,7 +24,7 @@ In this project, we aim to solve this problem by state-of-the-art Bert model.  I
 * example can be found under example folder
 
 ## Acknowledgement
-We thank Po-Wen Chen (b05902117@ntu.edu.tw) and Yu-Yu Wu (b06902104@ntu.edu.tw) for their profound contributions in model development.
+We thank Po-Wen Chen (b05902117@ntu.edu.tw) and Yu-Yu Wu (b06902104@ntu.edu.tw) for contributions in model development.
         
     
     
