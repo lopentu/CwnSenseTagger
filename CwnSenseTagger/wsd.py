@@ -2,7 +2,7 @@ from .preprocess import preprocess
 from .tokenize_test import tokenize
 from .test import test
 
-def wsd(data):
+def tag(data):
     cwn_batch = preprocess(data)
     tokenize_data = tokenize(cwn_batch)
     ans_idx = test(tokenize_data)

@@ -1,4 +1,4 @@
-from .wsd import wsd
+from .wsd import tag
 from .preprocess import preprocess
 from .tokenize_test import tokenize
 from .test import test

@@ -49,7 +49,10 @@ def batch_generation(batch_size, data):
 
     return all_batch
 
-def test(all_json, batch_size=8, model_path=os.path.join(os.path.dirname(__file__), 'data', 'cwn_v2.ckpt')):
+def test(all_json, 
+        batch_size=8, 
+        model_path=os.path.join(os.path.dirname(__file__), 'data', 'cwn-wsd-model.ckpt')):
+
     warnings.filterwarnings("ignore")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info('Device type is %s'%(device))

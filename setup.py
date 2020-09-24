@@ -4,25 +4,22 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="CWN_WSD", 
-    version="0.0.1",
-    author="Yuyu Wu",
-    author_email="b06902104@ntu.edu.tw",
+    name="CwnSenseTagger", 
+    version="0.1",
+    author="NTUGIL LOPE Lab",    
     description="A package to use chinese word net to achieve word sense disambigution task",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",        
         "Operating System :: OS Independent",
     ],
+    setup_requires=["wheel"],
     install_requires=[
-        "numpy",
-        "numpydoc",
-        "pandas",
-        "recommonmark",
+        "numpy",        
+        "pandas",        
         "torch",
         "tqdm",
         "transformers",

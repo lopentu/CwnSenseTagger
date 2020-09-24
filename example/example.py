@@ -1,12 +1,12 @@
 import json
 import logging
 import os
-import CWN_WSD
+import CwnSenseTagger
 
 def main():
     with open("input.json") as f:
         data = json.load(f)
-    all_ans = CWN_WSD.wsd(data)
+    all_ans = CwnSenseTagger.tag(data)
     print(all_ans)
 
 
