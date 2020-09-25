@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="UTF-8") as fh:
 
 setuptools.setup(
     name="CwnSenseTagger", 
-    version="0.1.1",
+    version="0.1.2",
     author="NTUGIL LOPE Lab",    
     description="A package to use chinese word net to achieve word sense disambigution task",
     long_description=long_description,
@@ -20,9 +20,9 @@ setuptools.setup(
     install_requires=[
         "numpy",        
         "pandas",        
-        "torch",
+        "torch>=1.6",
         "tqdm",
-        "transformers",
+        "transformers>=3.2",
     ],
     include_package_data=True,
     python_requires='>=3.5',
