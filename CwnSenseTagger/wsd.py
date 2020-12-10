@@ -6,6 +6,7 @@ def senseTag(data):
     cwn_batch = preprocess(data)
     tokenize_data = tokenize(cwn_batch)
     ans_idx = test(tokenize_data)
+
     all_ans = []
     for batch, sentence_idx  in zip(cwn_batch, ans_idx):
         sentence_ans = []

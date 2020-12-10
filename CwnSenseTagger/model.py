@@ -14,7 +14,8 @@ class WSDBertClassifer(BertPreTrainedModel):
         self.init_weights()
     
     def forward(self, context, attention_mask = None, token_type_ids = None, labels = None):
-        seq_out, pool_out = self.bert(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        seq_out, pool_out = self.bert(context, attention_mask=attention_mask, 
+                                token_type_ids=token_type_ids, return_dict=False)
         pool_out = self.dropout(pool_out)
         logits = self.classifer(pool_out)
         loss = 0
