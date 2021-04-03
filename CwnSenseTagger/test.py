@@ -88,10 +88,10 @@ def test(all_json, batch_size=8):
                 attention_mask = b['attention_mask'].to(device)
                 token_type_ids = b['token_type_ids'].to(torch.long).to(device)
 
-                logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)                
-                one_predict.append(logits)
+                logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+                one_predict += logits.squeeze(1).tolist()
 
-            sentence_ans.append(torch.cat(one_predict).view(-1).argmax().item())
+            sentence_ans.append(np.argmax(one_predict))
         all_ans.append(sentence_ans)
     logging.info("Done")
     return all_ans
