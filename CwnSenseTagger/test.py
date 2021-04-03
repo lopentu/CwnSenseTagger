@@ -75,12 +75,16 @@ def test(all_json, batch_size=8):
     logging.info("Start Inference")
     for sentence in all_json:
         sentence_ans =[]
-        for word in sentence:
+        for word in sentence:            
             if word[0] == []:
                 sentence_ans.append(-1)
                 continue
+            
+            if len(word) == 1:
+                sentence_ans.append(0)
+                continue
 
-            batches = batch_generation(batch_size, word)
+            batches = batch_generation(batch_size, word)            
             one_label = []
             one_predict = []
             for b in batches:
