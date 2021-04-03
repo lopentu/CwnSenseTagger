@@ -8,6 +8,7 @@ from .cwn_base import CwnBase
 from .download import get_model_path
 
 __cwn_inst = None
+__cwn_cache = {}
 
 def simplify_pos(pos):
     relation = {
@@ -39,6 +40,7 @@ def simplify_pos(pos):
         "I": "OTHER",
         "P": "OTHER",
         "T": "OTHER",
+        "nom,VA": "V",
         "VA": "V",
         "VAC": "V",
         "VB": "V",
@@ -74,7 +76,12 @@ def simplify_pos(pos):
 
 #Search and filter senses from CWN
 def get_cwn_senses(cwn, word_info):
-    senses = cwn.find_all_senses(word_info["word"])
+    word = word_info["word"]
+    if word in __cwn_cache:
+        senses = __cwn_cache[word]
+    else:
+        senses = cwn.find_all_senses(word)
+        __cwn_cache[word] = senses
 
     if len(senses) == 0:
         return []
