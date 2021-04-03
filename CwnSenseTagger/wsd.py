@@ -2,10 +2,10 @@ from .preprocess import preprocess
 from .tokenize_test import tokenize
 from .test import test
 
-def senseTag(data):
+def senseTag(data, batch_size=8):
     cwn_batch = preprocess(data)
     tokenize_data = tokenize(cwn_batch)
-    ans_idx = test(tokenize_data)
+    ans_idx = test(tokenize_data, batch_size)
 
     all_ans = []
     for batch, sentence_idx  in zip(cwn_batch, ans_idx):
