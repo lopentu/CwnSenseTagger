@@ -56,19 +56,19 @@ def collate_batches(batches, device="cpu"):
     if not batches:
         return {}
     concat_batch = {}
-    device = torch.device(device)    
-    
+    device = torch.device(device)
+
     for k in batches[0]:
         if batches[0][k].dim() == 1:
             concat_batch[k] = torch.cat([x[k] for x in batches])
             continue
-        N = sum(x[k].size(0) for x in batches)        
+        N = sum(x[k].size(0) for x in batches)
         max_seqlen = max(x[k].size(-1) for x in batches)
         padded = torch.full((N, max_seqlen), fill_value=PAD)
         N_offset = 0
         for batch_x in batches:
             n_x = batch_x[k].size(0)
-            padded[N_offset: N_offset+n_x, 
+            padded[N_offset: N_offset+n_x,
                    :batch_x[k].size(-1)] = batch_x[k]
             N_offset += n_x
         concat_batch[k] = padded.to(device)
@@ -103,11 +103,13 @@ def test_batched(all_json, batch_size=8):
     warmup()
 
     # model.load_state_dict(checkpoint['state_dict'])
-    all_ans = []    
-    logging.info("Start Inference")    
-    for sentence in all_json:        
-        batches = []
-        word_idxs = []
+    all_ans = [[]] * len(all_json)
+    logging.info("Start Inference")
+    batches = []
+    word_idxs = []
+    sent_idxs = []
+
+    for sent_idx, sentence in enumerate(all_json):
         sentence_ans = [-1] * len(sentence)
         for word_idx, word in enumerate(sentence):
             if word[0] == []:
@@ -117,31 +119,39 @@ def test_batched(all_json, batch_size=8):
             if len(word) == 1:
                 sentence_ans[word_idx] = 0
                 continue
-            
-            batch_x = batch_generation(len(word), word)[0]                        
+
+            batch_x = batch_generation(len(word), word)[0]
             batches.append(batch_x)
-            word_idxs.extend([word_idx] * batch_x["context"].size(0))
-        
-        concat_batch = collate_batches(batches)
-        word_idxs = np.array(word_idxs)
+            n_batch_x = batch_x["context"].size(0)
+            word_idxs.extend([word_idx] * n_batch_x)
+            sent_idxs.extend([sent_idx] * n_batch_x)
+        all_ans[sent_idx] = sentence_ans
+    
+    concat_batch = collate_batches(batches)
+    word_idxs = np.array(word_idxs)
+    sent_idxs = np.array(sent_idxs)    
 
-        one_predict = []
-        # run model through batches
-        for b in group_by_batch(concat_batch, batch_size):
-            context = b['context'].to(device)
-            attention_mask = b['attention_mask'].to(device)
-            token_type_ids = b['token_type_ids'].to(torch.long).to(device)
+    one_predict = []
+    # run model through batches
+    for b in group_by_batch(concat_batch, batch_size):
+        context = b['context'].to(device)
+        attention_mask = b['attention_mask'].to(device)
+        token_type_ids = b['token_type_ids'].to(torch.long).to(device)
 
-            logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
-            one_predict += logits.squeeze(1).tolist()
+        logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        one_predict += logits.squeeze(1).tolist()
 
-        # collect predictions by words
-        one_predict = np.array(one_predict)
-        for word_idx in np.unique(word_idxs):
-            logits_word = one_predict[word_idxs==word_idx]
-            sentence_ans[word_idx] = np.argmax(logits_word)
+    # collect predictions by words
+    one_predict = np.array(one_predict)
+    uniq_cursor = np.unique(np.vstack([sent_idxs, word_idxs]), axis=1)
 
-        all_ans.append(sentence_ans)
+    for uniq_i in range(uniq_cursor.shape[1]):
+        sent_idx, word_idx = uniq_cursor[:, uniq_i].tolist()
+        sentence_ans = all_ans[sent_idx]
+        mask = (sent_idxs == sent_idx) & (word_idxs == word_idx)
+        logits_word = one_predict[mask]
+        sentence_ans[word_idx] = np.argmax(logits_word)
+
     logging.info("Done")
     return all_ans
 
