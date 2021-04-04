@@ -3,6 +3,7 @@ import numpy as np
 import os
 import torch
 import warnings
+from time import time
 
 from argparse import ArgumentParser
 from transformers import AdamW, get_linear_schedule_with_warmup
@@ -14,7 +15,10 @@ from .model import WSDBertClassifer
 from .util import positive_weight, accuracy
 from .download import get_model_path
 
-wsd_model = None
+wsd_model = None        
+pred_timers = np.zeros(4, dtype=np.double)
+model_timers = np.zeros(3, dtype=np.double)
+profile_dbg = {"concat_batch_size": []}
 
 def batch_generation(batch_size, data):
     idx = 0
@@ -95,7 +99,7 @@ def warmup():
         wsd_model.eval()
 
 @torch.no_grad()
-def test_batched(all_json, batch_size=8):
+def test_batched(all_json, batch_size=8, profile=False):
     global wsd_model
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.USE_CUDA else 'cpu')
@@ -108,6 +112,10 @@ def test_batched(all_json, batch_size=8):
     batches = []
     word_idxs = []
     sent_idxs = []
+
+    if profile:
+        global pred_timers, model_timers, profile_dbg
+        t0 = time()
 
     for sent_idx, sentence in enumerate(all_json):
         sentence_ans = [-1] * len(sentence)
@@ -127,20 +135,37 @@ def test_batched(all_json, batch_size=8):
             sent_idxs.extend([sent_idx] * n_batch_x)
         all_ans[sent_idx] = sentence_ans
     
+    if profile: t1 = time()
+
     concat_batch = collate_batches(batches)
     word_idxs = np.array(word_idxs)
     sent_idxs = np.array(sent_idxs)    
 
+    if profile: 
+        t2 = time()
+        if concat_batch:
+            profile_dbg["concat_batch_size"].append(concat_batch["context"].size(0))
+
     one_predict = []
+
     # run model through batches
     for b in group_by_batch(concat_batch, batch_size):
+        if profile: t21 = time()
         context = b['context'].to(device)
         attention_mask = b['attention_mask'].to(device)
         token_type_ids = b['token_type_ids'].to(torch.long).to(device)
 
+        if profile: t22 = time()        
         logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+
+        if profile: t23 = time()
         one_predict += logits.squeeze(1).tolist()
 
+        if profile: 
+            t24 = time()
+            model_timers += np.array([t22-t21, t23-t22, t24-t23])
+
+    if profile: t3 = time()
     # collect predictions by words
     one_predict = np.array(one_predict)
     uniq_cursor = np.unique(np.vstack([sent_idxs, word_idxs]), axis=1)
@@ -151,6 +176,10 @@ def test_batched(all_json, batch_size=8):
         mask = (sent_idxs == sent_idx) & (word_idxs == word_idx)
         logits_word = one_predict[mask]
         sentence_ans[word_idx] = np.argmax(logits_word)
+
+    if profile:
+        t4 = time()
+        pred_timers += np.array([t1-t0, t2-t1, t3-t2, t4-t3])
 
     logging.info("Done")
     return all_ans
