@@ -1,4 +1,4 @@
-from .wsd import senseTag
+from .wsd import senseTag, senseTag_batched
 from .preprocess import preprocess
 from .tokenize_test import tokenize
 from .test import test

@@ -52,6 +52,38 @@ def batch_generation(batch_size, data):
 
     return all_batch
 
+def collate_batches(batches, device="cpu"):
+    if not batches:
+        return {}
+    concat_batch = {}
+    device = torch.device(device)    
+    
+    for k in batches[0]:
+        if batches[0][k].dim() == 1:
+            concat_batch[k] = torch.cat([x[k] for x in batches])
+            continue
+        N = sum(x[k].size(0) for x in batches)        
+        max_seqlen = max(x[k].size(-1) for x in batches)
+        padded = torch.full((N, max_seqlen), fill_value=PAD)
+        N_offset = 0
+        for batch_x in batches:
+            n_x = batch_x[k].size(0)
+            padded[N_offset: N_offset+n_x, 
+                   :batch_x[k].size(-1)] = batch_x[k]
+            N_offset += n_x
+        concat_batch[k] = padded.to(device)
+    return concat_batch
+
+def group_by_batch(data, batch_size=128):
+    if not data:
+        return
+    N = data[list(data.keys())[0]].size(0)
+    for i in range(0, N, batch_size):
+        batch = {}
+        for k in data:
+            batch[k] = data[k][i:i+batch_size]
+        yield batch
+
 def warmup():
     global wsd_model
     if not wsd_model:
@@ -61,6 +93,58 @@ def warmup():
         wsd_model = WSDBertClassifer.from_pretrained(get_model_path())
         wsd_model.to(device)
         wsd_model.eval()
+
+@torch.no_grad()
+def test_batched(all_json, batch_size=8):
+    global wsd_model
+
+    device = torch.device('cuda' if torch.cuda.is_available() and config.USE_CUDA else 'cpu')
+    warnings.filterwarnings("ignore")
+    warmup()
+
+    # model.load_state_dict(checkpoint['state_dict'])
+    all_ans = []    
+    logging.info("Start Inference")    
+    for sentence in all_json:        
+        batches = []
+        word_idxs = []
+        sentence_ans = [-1] * len(sentence)
+        for word_idx, word in enumerate(sentence):
+            if word[0] == []:
+                sentence_ans[word_idx] = -1
+                continue
+
+            if len(word) == 1:
+                sentence_ans[word_idx] = 0
+                continue
+            
+            batch_x = batch_generation(len(word), word)[0]                        
+            batches.append(batch_x)
+            word_idxs.extend([word_idx] * batch_x["context"].size(0))
+        
+        concat_batch = collate_batches(batches)
+        word_idxs = np.array(word_idxs)
+
+        one_predict = []
+        # run model through batches
+        for b in group_by_batch(concat_batch, batch_size):
+            context = b['context'].to(device)
+            attention_mask = b['attention_mask'].to(device)
+            token_type_ids = b['token_type_ids'].to(torch.long).to(device)
+
+            logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
+            one_predict += logits.squeeze(1).tolist()
+
+        # collect predictions by words
+        one_predict = np.array(one_predict)
+        for word_idx in np.unique(word_idxs):
+            logits_word = one_predict[word_idxs==word_idx]
+            sentence_ans[word_idx] = np.argmax(logits_word)
+
+        all_ans.append(sentence_ans)
+    logging.info("Done")
+    return all_ans
+
 
 @torch.no_grad()
 def test(all_json, batch_size=8):
@@ -75,16 +159,16 @@ def test(all_json, batch_size=8):
     logging.info("Start Inference")
     for sentence in all_json:
         sentence_ans =[]
-        for word in sentence:            
+        for word in sentence:
             if word[0] == []:
                 sentence_ans.append(-1)
                 continue
-            
+
             if len(word) == 1:
                 sentence_ans.append(0)
                 continue
 
-            batches = batch_generation(batch_size, word)            
+            batches = batch_generation(batch_size, word)
             one_label = []
             one_predict = []
             for b in batches:
