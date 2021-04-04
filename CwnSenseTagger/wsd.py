@@ -11,6 +11,8 @@ def senseTag_batched(data, batch_size=8, profile=False):
     for batch, sentence_idx  in zip(cwn_batch, ans_idx):
         sentence_ans = []
         for word, idx in zip(batch, sentence_idx):
+            if len(word) == 0:
+                continue
             if idx == -1:
                 word_ans = [word[idx]['test_word'], word[idx]['test_pos'], "", ""]
             else:

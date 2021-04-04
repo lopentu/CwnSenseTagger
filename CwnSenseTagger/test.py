@@ -126,6 +126,9 @@ def test_batched(all_json, batch_size=8, profile=False):
     for sent_idx, sentence in enumerate(all_json):
         sentence_ans = [-1] * len(sentence)
         for word_idx, word in enumerate(sentence):
+            if len(word) == 0:            
+                continue
+
             if word[0] == []:
                 sentence_ans[word_idx] = -1
                 continue
@@ -161,7 +164,7 @@ def test_batched(all_json, batch_size=8, profile=False):
         attention_mask = b['attention_mask'].to(device)
         token_type_ids = b['token_type_ids'].to(torch.long).to(device)
 
-        if profile: t22 = time()        
+        if profile: t22 = time()       
         logits, _ = wsd_model(context, attention_mask=attention_mask, token_type_ids=token_type_ids)
 
         if profile: t23 = time()
