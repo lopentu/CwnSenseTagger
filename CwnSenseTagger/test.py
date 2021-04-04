@@ -20,6 +20,12 @@ pred_timers = np.zeros(4, dtype=np.double)
 model_timers = np.zeros(3, dtype=np.double)
 profile_dbg = {"concat_batch_size": []}
 
+def reset_profiler():
+    global pred_timers, model_timers, profile_dbg
+    pred_timers = np.zeros(4, dtype=np.double)
+    model_timers = np.zeros(3, dtype=np.double)
+    profile_dbg = {"concat_batch_size": []}
+
 def batch_generation(batch_size, data):
     idx = 0
     target_idx = min(len(data), idx+batch_size)
