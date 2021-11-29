@@ -41,6 +41,7 @@ def simplify_pos(pos):
         "P": "OTHER",
         "T": "OTHER",
         "nom,VA": "V",
+        "VH,D": "V",
         "VA": "V",
         "VAC": "V",
         "VB": "V",
