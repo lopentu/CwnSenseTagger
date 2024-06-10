@@ -1,0 +1,1 @@
+from .dwsd import DottedWsdTagger

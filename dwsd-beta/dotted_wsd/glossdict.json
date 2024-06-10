@@ -1,0 +1,34 @@
+{
+    "physical": {
+        "zh_gloss": "有具體形狀。",
+        "zh_trans": "有形的"
+    },
+    "organization": {
+        "zh_gloss": "泛指機關團體或工作單位。",
+        "zh_trans": "機構"
+    },
+    "producer": {
+        "zh_gloss": "創作詩歌、文章或其他藝術品的人;製造或出售各種物品的商家。",
+        "zh_trans": "作者;製造商"
+    },
+    "location": {
+        "zh_gloss": "所在的地方。",
+        "zh_trans": "地點"
+    },
+    "event": {
+        "zh_gloss": "事情、事項。",
+        "zh_trans": "事件"
+    },
+    "human": {
+        "zh_gloss": "人的總稱。",
+        "zh_trans": "人類"
+    },
+    "information": {
+        "zh_gloss": "泛指一般資料和訊息。",
+        "zh_trans": "資訊"
+    },
+    "product": {
+        "zh_gloss": "文學藝術方面創作的成品;生產的物品。",
+        "zh_trans": "作品;產品"
+    }
+}

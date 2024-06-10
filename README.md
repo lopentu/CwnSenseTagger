@@ -5,28 +5,39 @@ Chinese word sense disambiguation has been known to a very difficult problem sin
 In this project, we aim to solve this problem by state-of-the-art Bert model.  It gives us huge performance gains and can score roughly 82% accuracy on Chinese word sense disambiguation problem.
 
 ## Prerequest
-* Input should be tokenized first. POS Tagging is preferred but not required.
+* Word Segmentation and POS Tagging is preferred but not required.
 * Suppose we have m sentences and each sentence has $n_m$ words.
-    * list_of_sentence[ [list_of_word[[target, pos, sense_id, sense] * $n_m$ ] *m ]
-    * The following is an example that has 2 sentences, input data should be formed as following
+    * list_of_sentence[ [list_of_word[[target, pos] * $n_m$ ]] *m ]
+    * The following is an example that has 2 sentences. Input data should be formed as following:
 
-            [[["他","Nh","",""],["由","P","",""],["昏沈","VH","",""],["的","DE","",""],["睡夢","Na","",""],["中","Ng","",""],["醒來","VH","",""],["，","COMMACATEGORY","",""]],
-             [["臉","Na","",""],["上","Ncd","",""],["濕涼","VH","",""],["的","DE","",""],["騷動","Nv","",""],["是","SHI","",""],["淚","Na","",""],["。","PERIODCATEGORY","",""]]]
+            tagged=[[["他","Nh"],["由","P"],["昏沈","VH"],["的","DE"],["睡夢","Na"],["中","Ng"],["醒來","VH"],["，","COMMACATEGORY"]],
+             [["臉","Na"],["上","Ncd"],["濕涼","VH"],["的","DE"],["騷動","Nv"],["是","SHI"],["淚","Na"],["。","PERIODCATEGORY"]]]
              
 
 ## How to get sense
-* At Project root directory (same as setup.py)
+* In your Project root directory
 
-        pip3 install .
-        import CWN_WSD
-        data = read_somewhere() #list of sentence, and sentence is composed as list of word
-        sense = CWN_WSD.wsd(data)
-* example can be found under example folder
+        pip install -U gdown
+        git clone https://github.com/lopentu/CwnSenseTagger
+        pip install -q CwnGraph transformers
+        import sys
+        if "dwsd-beta" not in sys.path:
+            sys.path.append("dwsd-beta")
+        
+        from dotted_wsd import DottedWsdTagger
+        tagger = DottedWsdTagger()
+
+* Basic Query
+
+        tagger.wsd_tag("<打>電話")[0]
+
+* Query with a result after Word Segmentation and POS tagging
+
+        tagger.sense_tag_per_sentence(tagged[0])
+
+## A Pipeline of [ckip-transformers](https://github.com/ckiplab/ckip-transformers) and the CWN sense tagger
+* See [dwsd.ipynb](https://github.com/lopentu/CwnSenseTagger/blob/main/dwsd.ipynb)
+
 
 ## Acknowledgement
 We thank Po-Wen Chen (b05902117@ntu.edu.tw) and Yu-Yu Wu (b06902104@ntu.edu.tw) for contributions in model development.
-        
-    
-    
-
-
