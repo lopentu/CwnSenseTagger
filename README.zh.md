@@ -36,7 +36,7 @@
         tagger.sense_tag_per_sentence(tagged[0])
 
 ## 結合 [ckip-transformers](https://github.com/ckiplab/ckip-transformers) 與 CWN 詞義標記器的 Pipeline
-* 請參考 [dwsd.ipynb](https://github.com/lopentu/CwnSenseTagger/blob/main/dwsd.ipynb)
+* 請參考 [dwsd.ipynb](https://github.com/lopentu/CwnSenseTagger/blob/master/dwsd.ipynb)
 
 
 ## 致謝

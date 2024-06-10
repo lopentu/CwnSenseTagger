@@ -39,7 +39,7 @@ In this project, we aim to solve this problem by state-of-the-art Bert model.  I
         tagger.sense_tag_per_sentence(tagged[0])
 
 ## A Pipeline of [ckip-transformers](https://github.com/ckiplab/ckip-transformers) and the CWN sense tagger
-* See [dwsd.ipynb](https://github.com/lopentu/CwnSenseTagger/blob/main/dwsd.ipynb)
+* See [dwsd.ipynb](https://github.com/lopentu/CwnSenseTagger/blob/master/dwsd.ipynb)
 
 
 ## Acknowledgement
