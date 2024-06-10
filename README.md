@@ -1,3 +1,6 @@
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/lopentu/CwnSenseTagger/blob/master/README.md)
+[![zh](https://img.shields.io/badge/lang-zh-green.svg)](https://github.com/lopentu/CwnSenseTagger/blob/master/README.zh.md)
+
 # Word Sense Disambiguaion by Chinese Word Net
 
 Chinese word sense disambiguation has been known to a very difficult problem since Chinese is a complicated language. A word can have dozens or even hundreds of meanings on different occasions. Manually labels the senses of the words is labor-intensive and inefficient.
